@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>BT4 Groot2 Web Monitor</title>
+
+  <style>
+    :root {
+      --bg0: #030712;
+      --bg1: #0b1120;
+      --bg2: #111827;
+
+      --card: #111827;
+      --card2: #1f2937;
+      --card3: #243244;
+
+      --line: #475569;
+      --line-soft: rgba(148, 163, 184, 0.32);
+
+      --text: #f8fafc;
+      --muted: #94a3b8;
+
+      --idle: #64748b;
+      --running: #06b6d4;
+      --success: #22c55e;
+      --failure: #fb7185;
+      --skipped: #facc15;
+      --purple: #a78bfa;
+
+      --glow-running: rgba(6, 182, 212, 0.42);
+      --glow-success: rgba(34, 197, 94, 0.32);
+      --glow-failure: rgba(251, 113, 133, 0.36);
+      --glow-skipped: rgba(250, 204, 21, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      font-family: Consolas, "Microsoft YaHei", monospace;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(6, 182, 212, 0.18), transparent 28%),
+        radial-gradient(circle at 82% 12%, rgba(167, 139, 250, 0.15), transparent 30%),
+        radial-gradient(circle at 70% 88%, rgba(34, 197, 94, 0.09), transparent 26%),
+        linear-gradient(135deg, #030712 0%, #0b1120 48%, #020617 100%);
+      display: grid;
+      grid-template-columns: 1fr 430px;
+    }
+
+    #workspace {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      min-width: 0;
+      border-right: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    #header {
+      padding: 18px 22px 14px;
+      background: rgba(2, 6, 23, 0.72);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      backdrop-filter: blur(14px);
+    }
+
+    #titleRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    #title {
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+    }
+
+    #subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    #connBadge {
+      min-width: 96px;
+      text-align: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    #connBadge.connected {
+      color: #bbf7d0;
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 0 24px rgba(34, 197, 94, 0.2);
+    }
+
+    #summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .summary-card {
+      position: relative;
+      overflow: hidden;
+      padding: 11px 13px;
+      min-height: 72px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    }
+
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: -24px;
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      position: relative;
+      z-index: 1;
+      font-weight: 900;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 22px;
+      background: rgba(15, 23, 42, 0.62);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      backdrop-filter: blur(12px);
+    }
+
+    button {
+      padding: 8px 13px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: linear-gradient(180deg, #1e293b, #111827);
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: 0.14s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(6, 182, 212, 0.45);
+      box-shadow: 0 0 18px rgba(6, 182, 212, 0.14);
+    }
+
+    #searchBox {
+      width: 300px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(2, 6, 23, 0.78);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+    }
+
+    #searchBox:focus {
+      border-color: rgba(6, 182, 212, 0.7);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
+    }
+
+    #canvasWrap {
+      position: relative;
+      overflow: auto;
+      padding: 42px 56px 80px;
+    }
+
+    #treeCanvas {
+      position: relative;
+      min-width: 1000px;
+      min-height: 640px;
+    }
+
+    #linkLayer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 1;
+    }
+
+    #nodeLayer {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 22px;
+    }
+
+    .tree-node-block {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .children-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 34px;
+      margin-top: 54px;
+      margin-left: 18px;
+    }
+
+    .bt-card {
+      position: relative;
+      width: 300px;
+      min-height: 96px;
+      border-radius: 22px;
+      padding: 15px 16px 13px;
+      background:
+        linear-gradient(145deg, rgba(31, 41, 55, 0.96), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+    }
+
+    .bt-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(6, 182, 212, 0.42);
+      box-shadow:
+        0 24px 52px rgba(0, 0, 0, 0.42),
+        0 0 28px rgba(6, 182, 212, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .bt-card.current {
+      outline: 2px solid rgba(255, 255, 255, 0.95);
+      transform: translateY(-4px) scale(1.025);
+      box-shadow:
+        0 0 0 5px rgba(255, 255, 255, 0.08),
+        0 0 42px rgba(6, 182, 212, 0.34),
+        0 24px 60px rgba(0, 0, 0, 0.48);
+      animation: currentSoftGlow 1.4s ease-in-out infinite;
+    }
+
+    @keyframes currentSoftGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 0 5px rgba(255, 255, 255, 0.08),
+          0 0 38px rgba(6, 182, 212, 0.28),
+          0 24px 60px rgba(0, 0, 0, 0.48);
+      }
+
+      50% {
+        box-shadow:
+          0 0 0 7px rgba(255, 255, 255, 0.10),
+          0 0 58px rgba(6, 182, 212, 0.48),
+          0 26px 66px rgba(0, 0, 0, 0.52);
+      }
+    }
+
+    .bt-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      pointer-events: none;
+      opacity: 0.95;
+      border-left: 7px solid var(--idle);
+    }
+
+    .bt-card.node-RUNNING {
+      border-color: rgba(6, 182, 212, 0.82);
+      background:
+        radial-gradient(circle at 90% 15%, rgba(6, 182, 212, 0.22), transparent 34%),
+        linear-gradient(145deg, rgba(8, 47, 73, 0.98), rgba(15, 23, 42, 0.98));
+      animation: pulseRunning 1.05s infinite ease-in-out;
+    }
+
+    .bt-card.node-RUNNING.current {
+      animation:
+        pulseRunning 1.05s infinite ease-in-out,
+        currentSoftGlow 1.4s ease-in-out infinite;
+    }
+
+    .bt-card.node-RUNNING::before {
+      border-left-color: var(--running);
+    }
+
+    .bt-card.node-SUCCESS,
+    .bt-card.node-IDLE_FROM_SUCCESS {
+      border-color: rgba(34, 197, 94, 0.58);
+      background:
+        radial-gradient(circle at 90% 15%, rgba(34, 197, 94, 0.16), transparent 34%),
+        linear-gradient(145deg, rgba(20, 83, 45, 0.50), rgba(15, 23, 42, 0.98));
+    }
+
+    .bt-card.node-SUCCESS::before,
+    .bt-card.node-IDLE_FROM_SUCCESS::before {
+      border-left-color: var(--success);
+    }
+
+    .bt-card.node-FAILURE,
+    .bt-card.node-IDLE_FROM_FAILURE {
+      border-color: rgba(251, 113, 133, 0.78);
+      background:
+        radial-gradient(circle at 90% 15%, rgba(251, 113, 133, 0.22), transparent 34%),
+        linear-gradient(145deg, rgba(127, 29, 29, 0.62), rgba(15, 23, 42, 0.98));
+    }
+
+    .bt-card.node-FAILURE::before,
+    .bt-card.node-IDLE_FROM_FAILURE::before {
+      border-left-color: var(--failure);
+    }
+
+    .bt-card.node-SKIPPED,
+    .bt-card.node-IDLE_FROM_SKIPPED {
+      border-color: rgba(250, 204, 21, 0.58);
+      background:
+        radial-gradient(circle at 90% 15%, rgba(250, 204, 21, 0.16), transparent 34%),
+        linear-gradient(145deg, rgba(113, 63, 18, 0.55), rgba(15, 23, 42, 0.98));
+    }
+
+    .bt-card.node-SKIPPED::before,
+    .bt-card.node-IDLE_FROM_SKIPPED::before {
+      border-left-color: var(--skipped);
+    }
+
+    @keyframes pulseRunning {
+      0%, 100% {
+        box-shadow:
+          0 0 0 0 rgba(6, 182, 212, 0.08),
+          0 0 34px rgba(6, 182, 212, 0.22),
+          0 20px 45px rgba(0, 0, 0, 0.34);
+      }
+
+      50% {
+        box-shadow:
+          0 0 0 7px rgba(6, 182, 212, 0.11),
+          0 0 56px rgba(6, 182, 212, 0.38),
+          0 24px 58px rgba(0, 0, 0, 0.42);
+      }
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .node-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(2, 6, 23, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      font-size: 18px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .node-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .node-name {
+      font-size: 15px;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .node-kind {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: #cbd5e1;
+      background: rgba(100, 116, 139, 0.16);
+    }
+
+    .badge-RUNNING {
+      color: #7dd3fc;
+      background: rgba(6, 182, 212, 0.14);
+      border-color: rgba(6, 182, 212, 0.48);
+    }
+
+    .badge-SUCCESS,
+    .badge-IDLE_FROM_SUCCESS {
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.14);
+      border-color: rgba(34, 197, 94, 0.45);
+    }
+
+    .badge-FAILURE,
+    .badge-IDLE_FROM_FAILURE {
+      color: #fecaca;
+      background: rgba(251, 113, 133, 0.14);
+      border-color: rgba(251, 113, 133, 0.45);
+    }
+
+    .badge-SKIPPED,
+    .badge-IDLE_FROM_SKIPPED {
+      color: #fde68a;
+      background: rgba(250, 204, 21, 0.14);
+      border-color: rgba(250, 204, 21, 0.45);
+    }
+
+    .card-bottom {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .uid-chip {
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(2, 6, 23, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #side {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(14px);
+    }
+
+    #sideHeader {
+      padding: 18px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(2, 6, 23, 0.62);
+    }
+
+    #sideTitle {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    #sideSub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    #legend {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--idle);
+    }
+
+    .dot.running { background: var(--running); }
+    .dot.success { background: var(--success); }
+    .dot.failure { background: var(--failure); }
+    .dot.skipped { background: var(--skipped); }
+
+    #logContent {
+      overflow: auto;
+      padding: 14px 16px 24px;
+    }
+
+    .log-line {
+      position: relative;
+      margin-left: 10px;
+      margin-bottom: 12px;
+      padding: 10px 12px 10px 16px;
+      border-radius: 14px;
+      background: rgba(30, 41, 59, 0.68);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+      font-size: 13px;
+    }
+
+    .log-line::before {
+      content: "";
+      position: absolute;
+      left: -16px;
+      top: 16px;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--idle);
+      box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.13);
+    }
+
+    .log-line::after {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: 28px;
+      bottom: -20px;
+      width: 2px;
+      background: rgba(71, 85, 105, 0.42);
+    }
+
+    .log-RUNNING::before {
+      background: var(--running);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.12);
+    }
+
+    .log-SUCCESS::before,
+    .log-IDLE_FROM_SUCCESS::before {
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+    }
+
+    .log-FAILURE::before,
+    .log-IDLE_FROM_FAILURE::before {
+      background: var(--failure);
+      box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.12);
+    }
+
+    .log-SKIPPED::before,
+    .log-IDLE_FROM_SKIPPED::before {
+      background: var(--skipped);
+      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.12);
+    }
+
+    .log-time {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .log-main {
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .log-name {
+      font-weight: 900;
+      color: #f8fafc;
+    }
+
+    .log-status {
+      font-weight: 900;
+    }
+
+    .log-RUNNING .log-status { color: var(--running); }
+    .log-SUCCESS .log-status,
+    .log-IDLE_FROM_SUCCESS .log-status { color: var(--success); }
+    .log-FAILURE .log-status,
+    .log-IDLE_FROM_FAILURE .log-status { color: var(--failure); }
+    .log-SKIPPED .log-status,
+    .log-IDLE_FROM_SKIPPED .log-status { color: var(--skipped); }
+
+    #bottomStatus {
+      position: fixed;
+      left: 18px;
+      bottom: 14px;
+      z-index: 50;
+      padding: 7px 13px;
+      border-radius: 999px;
+      color: #cbd5e1;
+      font-size: 12px;
+      background: rgba(2, 6, 23, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      backdrop-filter: blur(10px);
+    }
+
+    .link-path {
+      fill: none;
+      stroke: rgba(148, 163, 184, 0.36);
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-dasharray: 0;
+    }
+
+    .link-path.active {
+      stroke: rgba(6, 182, 212, 0.95);
+      stroke-width: 3.2;
+      filter: drop-shadow(0 0 7px rgba(6, 182, 212, 0.75));
+      animation: flowLine 1.2s linear infinite;
+    }
+
+    @keyframes flowLine {
+      0% {
+        stroke-dasharray: 8 8;
+        stroke-dashoffset: 16;
+      }
+
+      100% {
+        stroke-dasharray: 8 8;
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @media (max-width: 1300px) {
+      body {
+        grid-template-columns: 1fr 390px;
+      }
+
+      #summary {
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+      }
+
+      .bt-card {
+        width: 270px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main id="workspace">
+    <header id="header">
+      <div id="titleRow">
+        <div>
+          <div id="title">BT4 Groot2 Web Monitor</div>
+          <div id="subtitle">BehaviorTree.CPP 4.x · Groot2Publisher Bridge · Runtime Visualization</div>
+        </div>
+        <div id="connBadge">未连接</div>
+      </div>
+
+      <section id="summary">
+        <div class="summary-card">
+          <div class="summary-label">当前执行节点</div>
+          <div class="summary-value" id="currentNode">-</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">当前状态</div>
+          <div class="summary-value" id="currentStatus">-</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">最后失败节点</div>
+          <div class="summary-value" id="lastFailure">-</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">节点数量</div>
+          <div class="summary-value" id="nodeCount">0</div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-label">最后更新时间</div>
+          <div class="summary-value" id="lastUpdate">-</div>
+        </div>
+      </section>
+    </header>
+
+    <section id="toolbar">
+      <button onclick="clearLog()">清空日志</button>
+      <button onclick="resetHighlight()">取消高亮</button>
+      <button onclick="scrollToCurrent()">定位当前节点</button>
+      <button onclick="toggleAutoCenter()" id="autoCenterBtn">自动居中：开</button>
+      <button onclick="fitToRoot()">回到根节点</button>
+      <input id="searchBox" placeholder="搜索节点名 / 类型 / uid" oninput="filterNodes()" />
+    </section>
+
+    <section id="canvasWrap">
+      <div id="treeCanvas">
+        <svg id="linkLayer"></svg>
+        <div id="nodeLayer">等待行为树数据...</div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="side">
+    <div id="sideHeader">
+      <div id="sideTitle">执行时间线</div>
+      <div id="sideSub">最新状态变化在最上方</div>
+
+      <div id="legend">
+        <div class="legend-item"><span class="dot running"></span> RUNNING</div>
+        <div class="legend-item"><span class="dot success"></span> SUCCESS</div>
+        <div class="legend-item"><span class="dot failure"></span> FAILURE</div>
+        <div class="legend-item"><span class="dot skipped"></span> SKIPPED</div>
+      </div>
+    </div>
+
+    <div id="logContent"></div>
+  </aside>
+
+  <div id="bottomStatus">未连接</div>
+
+  <script>
+    const nodeMap = new Map();
+    const nodeNameMap = new Map();
+    const nodeStatusMap = new Map();
+    const parentMap = new Map();
+
+    let lastCurrentUid = null;
+    let totalNodeCount = 0;
+
+    let autoCenterEnabled = true;
+    let centerAnimationId = null;
+    let centerTarget = null;
+    let lastAutoCenterTime = 0;
+
+    let userScrolling = false;
+    let userScrollTimer = null;
+
+    const nodeLayer = document.getElementById("nodeLayer");
+    const linkLayer = document.getElementById("linkLayer");
+    const canvasWrap = document.getElementById("canvasWrap");
+    const treeCanvas = document.getElementById("treeCanvas");
+
+    const logContent = document.getElementById("logContent");
+    const bottomStatus = document.getElementById("bottomStatus");
+    const connBadge = document.getElementById("connBadge");
+
+    const currentNodeEl = document.getElementById("currentNode");
+    const currentStatusEl = document.getElementById("currentStatus");
+    const lastFailureEl = document.getElementById("lastFailure");
+    const nodeCountEl = document.getElementById("nodeCount");
+    const lastUpdateEl = document.getElementById("lastUpdate");
+    const searchBox = document.getElementById("searchBox");
+
+    function iconForNode(node) {
+      const name = `${node.kind || ""} ${node.name || ""}`.toLowerCase();
+
+      if (name.includes("sequence")) return "⮕";
+      if (name.includes("fallback")) return "◇";
+      if (name.includes("parallel")) return "∥";
+      if (name.includes("condition") || name.includes("is")) return "?";
+      if (name.includes("sleep")) return "⏱";
+      if (name.includes("move")) return "↗";
+      if (name.includes("jog")) return "▶";
+
+      return "●";
+    }
+
+    function cleanStatus(status) {
+      return String(status || "IDLE").replaceAll(" ", "_");
+    }
+
+    function renderNodeBlock(node, parentUid = null) {
+      totalNodeCount++;
+
+      const block = document.createElement("div");
+      block.className = "tree-node-block";
+      block.dataset.uid = node.uid;
+      block.dataset.name = node.name || "";
+      block.dataset.kind = node.kind || "";
+
+      const card = document.createElement("div");
+      card.className = "bt-card node-IDLE";
+      card.dataset.uid = node.uid;
+
+      const top = document.createElement("div");
+      top.className = "card-top";
+
+      const icon = document.createElement("div");
+      icon.className = "node-icon";
+      icon.textContent = iconForNode(node);
+
+      const info = document.createElement("div");
+      info.className = "node-info";
+
+      const name = document.createElement("div");
+      name.className = "node-name";
+      name.textContent = node.name || "unnamed";
+
+      const kind = document.createElement("div");
+      kind.className = "node-kind";
+      kind.textContent = `[${node.kind}]`;
+
+      info.appendChild(name);
+      info.appendChild(kind);
+
+      const badge = document.createElement("div");
+      badge.className = "status-badge badge-IDLE";
+      badge.dataset.role = "status";
+      badge.textContent = "IDLE";
+
+      top.appendChild(icon);
+      top.appendChild(info);
+      top.appendChild(badge);
+
+      const bottom = document.createElement("div");
+      bottom.className = "card-bottom";
+      bottom.innerHTML = `
+        <span class="uid-chip">uid=${node.uid}</span>
+        <span data-role="time">last: -</span>
+      `;
+
+      card.appendChild(top);
+      card.appendChild(bottom);
+      block.appendChild(card);
+
+      nodeMap.set(Number(node.uid), card);
+      nodeNameMap.set(Number(node.uid), node.name || `uid=${node.uid}`);
+      nodeStatusMap.set(Number(node.uid), "IDLE");
+
+      if (parentUid !== null) {
+        parentMap.set(Number(node.uid), Number(parentUid));
+      }
+
+      if (node.children && node.children.length > 0) {
+        const row = document.createElement("div");
+        row.className = "children-row";
+
+        for (const child of node.children) {
+          row.appendChild(renderNodeBlock(child, node.uid));
+        }
+
+        block.appendChild(row);
+      }
+
+      return block;
+    }
+
+    function renderTree(root) {
+      nodeMap.clear();
+      nodeNameMap.clear();
+      nodeStatusMap.clear();
+      parentMap.clear();
+
+      totalNodeCount = 0;
+      lastCurrentUid = null;
+
+      nodeLayer.innerHTML = "";
+      linkLayer.innerHTML = "";
+
+      nodeLayer.appendChild(renderNodeBlock(root));
+
+      nodeCountEl.textContent = String(totalNodeCount);
+      currentNodeEl.textContent = "-";
+      currentStatusEl.textContent = "-";
+      lastFailureEl.textContent = "-";
+      lastUpdateEl.textContent = "-";
+
+      requestAnimationFrame(() => {
+        drawLinks();
+        fitToRoot();
+      });
+    }
+
+    function drawLinks() {
+      linkLayer.innerHTML = "";
+
+      const canvasRect = treeCanvas.getBoundingClientRect();
+      const maxRight = Math.max(treeCanvas.scrollWidth, nodeLayer.scrollWidth + 260);
+      const maxBottom = Math.max(treeCanvas.scrollHeight, nodeLayer.scrollHeight + 260);
+
+      linkLayer.setAttribute("width", maxRight);
+      linkLayer.setAttribute("height", maxBottom);
+      linkLayer.style.width = maxRight + "px";
+      linkLayer.style.height = maxBottom + "px";
+
+      for (const [childUid, parentUid] of parentMap.entries()) {
+        const parent = nodeMap.get(parentUid);
+        const child = nodeMap.get(childUid);
+        if (!parent || !child) continue;
+
+        const pr = parent.getBoundingClientRect();
+        const cr = child.getBoundingClientRect();
+
+        const x1 = pr.left + pr.width / 2 - canvasRect.left + canvasWrap.scrollLeft;
+        const y1 = pr.bottom - canvasRect.top + canvasWrap.scrollTop;
+
+        const x2 = cr.left + cr.width / 2 - canvasRect.left + canvasWrap.scrollLeft;
+        const y2 = cr.top - canvasRect.top + canvasWrap.scrollTop;
+
+        const midY = y1 + Math.max(28, (y2 - y1) * 0.48);
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+        path.setAttribute("class", "link-path");
+        path.dataset.parent = parentUid;
+        path.dataset.child = childUid;
+
+        linkLayer.appendChild(path);
+      }
+    }
+
+    function markActivePath(uid) {
+      document.querySelectorAll(".link-path").forEach(p => {
+        p.classList.remove("active");
+      });
+
+      let current = Number(uid);
+
+      while (parentMap.has(current)) {
+        const parent = parentMap.get(current);
+        const path = document.querySelector(`.link-path[data-parent="${parent}"][data-child="${current}"]`);
+
+        if (path) {
+          path.classList.add("active");
+        }
+
+        current = parent;
+      }
+    }
+
+    function setCurrentNode(uid, status) {
+      uid = Number(uid);
+
+      if (lastCurrentUid !== null) {
+        const oldCard = nodeMap.get(lastCurrentUid);
+        if (oldCard) {
+          oldCard.classList.remove("current");
+        }
+      }
+
+      const card = nodeMap.get(uid);
+      if (!card) return;
+
+      card.classList.add("current");
+      lastCurrentUid = uid;
+
+      const name = nodeNameMap.get(uid) || `uid=${uid}`;
+
+      currentNodeEl.textContent = `${name} (${uid})`;
+      currentStatusEl.textContent = status;
+
+      markActivePath(uid);
+
+      if (autoCenterEnabled && !userScrolling) {
+        centerCurrentNodeSmooth(card);
+      }
+    }
+
+    function centerCurrentNodeSmooth(card) {
+      if (!card) return;
+
+      const now = performance.now();
+
+      if (now - lastAutoCenterTime < 120) {
+        centerTarget = card;
+        return;
+      }
+
+      lastAutoCenterTime = now;
+      centerTarget = card;
+
+      if (centerAnimationId !== null) {
+        cancelAnimationFrame(centerAnimationId);
+        centerAnimationId = null;
+      }
+
+      const wrapRect = canvasWrap.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+
+      const startLeft = canvasWrap.scrollLeft;
+      const startTop = canvasWrap.scrollTop;
+
+      const cardCenterX = cardRect.left - wrapRect.left + startLeft + cardRect.width / 2;
+      const cardCenterY = cardRect.top - wrapRect.top + startTop + cardRect.height / 2;
+
+      const targetLeft = Math.max(0, cardCenterX - wrapRect.width / 2);
+      const targetTop = Math.max(0, cardCenterY - wrapRect.height / 2);
+
+      const distance = Math.hypot(targetLeft - startLeft, targetTop - startTop);
+      const duration = Math.min(900, Math.max(380, distance * 0.45));
+
+      const startTime = performance.now();
+
+      function easeInOutCubic(t) {
+        return t < 0.5
+          ? 4 * t * t * t
+          : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      function animate(time) {
+        const elapsed = time - startTime;
+        const t = Math.min(1, elapsed / duration);
+        const eased = easeInOutCubic(t);
+
+        canvasWrap.scrollLeft = startLeft + (targetLeft - startLeft) * eased;
+        canvasWrap.scrollTop = startTop + (targetTop - startTop) * eased;
+
+        if (t < 1) {
+          centerAnimationId = requestAnimationFrame(animate);
+        } else {
+          centerAnimationId = null;
+
+          if (centerTarget && centerTarget !== card) {
+            const nextTarget = centerTarget;
+            centerTarget = null;
+            centerCurrentNodeSmooth(nextTarget);
+          }
+        }
+      }
+
+      centerAnimationId = requestAnimationFrame(animate);
+    }
+
+    function scrollToCurrent() {
+      if (lastCurrentUid === null) return;
+
+      const card = nodeMap.get(lastCurrentUid);
+      if (!card) return;
+
+      centerCurrentNodeSmooth(card);
+    }
+
+    function toggleAutoCenter() {
+      autoCenterEnabled = !autoCenterEnabled;
+
+      const btn = document.getElementById("autoCenterBtn");
+      btn.textContent = autoCenterEnabled ? "自动居中：开" : "自动居中：关";
+
+      if (autoCenterEnabled && lastCurrentUid !== null) {
+        const card = nodeMap.get(lastCurrentUid);
+        centerCurrentNodeSmooth(card);
+      }
+    }
+
+    function fitToRoot() {
+      canvasWrap.scrollTo({
+        left: 0,
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    function applyStatus(uid, status, timestampMs) {
+      uid = Number(uid);
+      status = cleanStatus(status);
+
+      const card = nodeMap.get(uid);
+      if (!card) return;
+
+      const oldStatus = nodeStatusMap.get(uid);
+      nodeStatusMap.set(uid, status);
+
+      card.classList.remove(
+        "node-IDLE",
+        "node-RUNNING",
+        "node-SUCCESS",
+        "node-FAILURE",
+        "node-SKIPPED",
+        "node-IDLE_FROM_RUNNING",
+        "node-IDLE_FROM_SUCCESS",
+        "node-IDLE_FROM_FAILURE",
+        "node-IDLE_FROM_SKIPPED"
+      );
+
+      card.classList.add("node-" + status);
+
+      const badge = card.querySelector('[data-role="status"]');
+      if (badge) {
+        badge.className = "status-badge badge-" + status;
+        badge.textContent = status;
+      }
+
+      const time = new Date(timestampMs || Date.now()).toLocaleTimeString();
+
+      const timeEl = card.querySelector('[data-role="time"]');
+      if (timeEl) {
+        timeEl.textContent = `last: ${time}`;
+      }
+
+      const name = nodeNameMap.get(uid) || `uid=${uid}`;
+      lastUpdateEl.textContent = time;
+
+      if (
+        status === "RUNNING" ||
+        status === "FAILURE" ||
+        status === "IDLE_FROM_FAILURE"
+      ) {
+        setCurrentNode(uid, status);
+      }
+
+      if (status === "FAILURE" || status === "IDLE_FROM_FAILURE") {
+        lastFailureEl.textContent = `${name} (${uid})`;
+      }
+
+      if (oldStatus !== status) {
+        addLogLine(time, uid, name, status);
+      }
+    }
+
+    function addLogLine(time, uid, name, status) {
+      const line = document.createElement("div");
+      line.className = "log-line log-" + status;
+
+      line.innerHTML = `
+        <div class="log-time">${escapeHtml(time)} · uid=${uid}</div>
+        <div class="log-main">
+          <span class="log-name">${escapeHtml(name)}</span>
+          <span> → </span>
+          <span class="log-status">${escapeHtml(status)}</span>
+        </div>
+      `;
+
+      logContent.prepend(line);
+
+      while (logContent.children.length > 800) {
+        logContent.removeChild(logContent.lastChild);
+      }
+    }
+
+    function handleMessage(msg) {
+      if (msg.type === "tree") {
+        renderTree(msg.root);
+        bottomStatus.textContent = "已加载行为树";
+      }
+
+      if (msg.type === "status") {
+        applyStatus(msg.uid, msg.status, msg.timestamp_ms);
+      }
+
+      if (msg.type === "bridge_status") {
+        bottomStatus.textContent = msg.status + ": " + msg.message;
+      }
+    }
+
+    function connect() {
+      const ws = new WebSocket(`ws://${location.host}/ws/viewer`);
+
+      ws.onopen = () => {
+        bottomStatus.textContent = "网页 WebSocket 已连接";
+        connBadge.textContent = "已连接";
+        connBadge.classList.add("connected");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          handleMessage(msg);
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      ws.onclose = () => {
+        bottomStatus.textContent = "网页连接断开，2 秒后重连";
+        connBadge.textContent = "重连中";
+        connBadge.classList.remove("connected");
+
+        setTimeout(connect, 2000);
+      };
+
+      ws.onerror = () => {
+        bottomStatus.textContent = "网页 WebSocket 错误";
+        connBadge.textContent = "错误";
+        connBadge.classList.remove("connected");
+      };
+    }
+
+    function clearLog() {
+      logContent.innerHTML = "";
+    }
+
+    function resetHighlight() {
+      if (lastCurrentUid !== null) {
+        const card = nodeMap.get(lastCurrentUid);
+        if (card) {
+          card.classList.remove("current");
+        }
+      }
+
+      document.querySelectorAll(".link-path").forEach(p => {
+        p.classList.remove("active");
+      });
+
+      lastCurrentUid = null;
+      currentNodeEl.textContent = "-";
+      currentStatusEl.textContent = "-";
+    }
+
+    function filterNodes() {
+      const keyword = searchBox.value.trim().toLowerCase();
+
+      for (const [uid, card] of nodeMap.entries()) {
+        const block = card.parentElement;
+        const name = block.dataset.name.toLowerCase();
+        const kind = block.dataset.kind.toLowerCase();
+        const uidText = String(uid);
+
+        if (
+          keyword === "" ||
+          name.includes(keyword) ||
+          kind.includes(keyword) ||
+          uidText.includes(keyword)
+        ) {
+          block.classList.remove("hidden");
+        } else {
+          block.classList.add("hidden");
+        }
+      }
+
+      requestAnimationFrame(drawLinks);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    canvasWrap.addEventListener("wheel", () => {
+      userScrolling = true;
+
+      clearTimeout(userScrollTimer);
+      userScrollTimer = setTimeout(() => {
+        userScrolling = false;
+      }, 1200);
+    }, { passive: true });
+
+    canvasWrap.addEventListener("mousedown", () => {
+      userScrolling = true;
+
+      clearTimeout(userScrollTimer);
+      userScrollTimer = setTimeout(() => {
+        userScrolling = false;
+      }, 1200);
+    });
+
+    window.addEventListener("resize", () => {
+      requestAnimationFrame(drawLinks);
+    });
+
+    connect();
+  </script>
+</body>
+</html>

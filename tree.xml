@@ -1,0 +1,238 @@
+<root BTCPP_format="4">
+    <BehaviorTree ID="move_and_ctr" _fullpath="">
+        <Sequence name="Sequence" _uid="1">
+            <Sequence name="Sequence" _uid="2">
+                <IsEnable name="IsEnable" _uid="3"/>
+                <HaveTwoFingerGripper name="HaveTwoFingerGripper" _uid="4" robot_sel="0"/>
+                <HaveTwoFingerGripper name="HaveTwoFingerGripper" _uid="5" robot_sel="0"/>
+            </Sequence>
+            <Sequence name="Sequence" _uid="6">
+                <MoveTwoFingersGripper name="MoveTwoFingersGripper" _uid="7" interval="25" distance="70" robot_sel="0"/>
+                <Sleep name="Sleep" _uid="8" msec="5000"/>
+            </Sequence>
+            <Sequence name="Sequence" _uid="9">
+                <MobileRobotModbusTCPJGBOT name="MobileRobotModbusTCPJGBOT" _uid="10" target_station_id="6" navigate_open="1" vtheta="0.2" vy="0.2" vx="0.2" y_axis="0.1" x_axis="0.1" theta="0.1" robot_sel="0"/>
+                <RetryUntilSuccessful name="RetryUntilSuccessful" _uid="11" num_attempts="100">
+                    <IsMobileRobotModbusTCPJGBOTArrived name="IsMobileRobotModbusTCPJGBOTArrived" _uid="12" robot_sel="0"/>
+                </RetryUntilSuccessful>
+            </Sequence>
+            <Sequence name="Sequence" _uid="13">
+                <MoveAbsJVar name="MoveAbsJVar" _uid="14" speed="v50" jointtarget_value="0;0;0;0;0;0;0;0;0;0" robot_sel="0"/>
+                <MoveAbsJVar name="MoveAbsJVar" _uid="15" speed="v50" jointtarget_value="0.722696697859123;-0.00369114126659276;-0.00417051026225416;-1.62515676909127;-1.50656087956464;1.36442797235104;0;0;0;0" robot_sel="0"/>
+                <MoveAbsJVar name="MoveAbsJVar" _uid="16" speed="v50" jointtarget_value="0.722648760959557;0.146207543676726;-0.00417051026225416;-1.62515676909127;-1.50656087956464;1.36442797235104;0;0;0;0" robot_sel="0"/>
+            </Sequence>
+            <Sequence name="Sequence" _uid="17">
+                <MoveTwoFingersGripper name="MoveTwoFingersGripper" _uid="18" interval="25" distance="0" robot_sel="0"/>
+                <Sleep name="Sleep" _uid="19" msec="5000"/>
+            </Sequence>
+            <Sequence name="Sequence" _uid="20">
+                <MoveAbsJVar name="MoveAbsJVar" _uid="21" speed="v50" jointtarget_value="0.722696697859123;-0.00369114126659276;-0.00417051026225416;-1.62515676909127;-1.50656087956464;1.36442797235104;0;0;0;0" robot_sel="0"/>
+                <MoveAbsJVar name="MoveAbsJVar" _uid="22" speed="v50" jointtarget_value="0.00273240327526997;-0.746137841746966;0.847859942626314;-1.60406453328217;-1.48230480838417;1.36442797235104;0;0;0;0" robot_sel="0"/>
+            </Sequence>
+            <Sequence name="Sequence" _uid="23">
+                <MobileRobotModbusTCPJGBOT name="MobileRobotModbusTCPJGBOT" _uid="24" target_station_id="1" navigate_open="1" vtheta="0.2" vy="0.2" vx="0.2" y_axis="0.1" x_axis="0.1" theta="0.1" robot_sel="0"/>
+                <RetryUntilSuccessful name="RetryUntilSuccessful" _uid="25" num_attempts="100">
+                    <IsMobileRobotModbusTCPJGBOTArrived name="IsMobileRobotModbusTCPJGBOTArrived" _uid="26" robot_sel="0"/>
+                </RetryUntilSuccessful>
+                <MobileRobotModbusTCPJGBOT name="MobileRobotModbusTCPJGBOT" _uid="27" target_station_id="6" navigate_open="1" vtheta="0.2" vy="0.2" vx="0.2" y_axis="0.1" x_axis="0.1" theta="0.1" robot_sel="0"/>
+                <RetryUntilSuccessful name="RetryUntilSuccessful" _uid="28" num_attempts="100">
+                    <IsMobileRobotModbusTCPJGBOTArrived name="IsMobileRobotModbusTCPJGBOTArrived" _uid="29" robot_sel="0"/>
+                </RetryUntilSuccessful>
+            </Sequence>
+            <Sequence name="Sequence" _uid="30">
+                <MoveAbsJVar name="MoveAbsJVar" _uid="31" speed="v50" jointtarget_value="0.722696697859123;-0.00369114126659276;-0.00417051026225416;-1.62515676909127;-1.50656087956464;1.36442797235104;0;0;0;0" robot_sel="0"/>
+                <MoveAbsJVar name="MoveAbsJVar" _uid="32" speed="v50" jointtarget_value="0.722648760959557;0.146207543676726;-0.00417051026225416;-1.62515676909127;-1.50656087956464;1.36442797235104;0;0;0;0" robot_sel="0"/>
+                <Sequence name="Sequence" _uid="33">
+                    <MoveTwoFingersGripper name="MoveTwoFingersGripper" _uid="34" interval="25" distance="70" robot_sel="0"/>
+                    <Sleep name="Sleep" _uid="35" msec="5000"/>
+                </Sequence>
+                <MoveAbsJVar name="MoveAbsJVar" _uid="36" speed="v50" jointtarget_value="0.722696697859123;-0.00369114126659276;-0.00417051026225416;-1.62515676909127;-1.50656087956464;1.36442797235104;0;0;0;0" robot_sel="0"/>
+                <MoveAbsJVar name="MoveAbsJVar" _uid="37" speed="v50" jointtarget_value="0;0;0;0;0;0;0;0;0;0" robot_sel="0"/>
+            </Sequence>
+        </Sequence>
+    </BehaviorTree>
+    <TreeNodesModel>
+        <Action ID="AlwaysFailure"/>
+        <Action ID="AlwaysSuccess"/>
+        <Control ID="AsyncFallback"/>
+        <Control ID="AsyncSequence"/>
+        <Decorator ID="Delay">
+            <input_port name="delay_msec" type="unsigned int">Tick the child after a few milliseconds</input_port>
+        </Decorator>
+        <Control ID="Fallback"/>
+        <Decorator ID="ForceFailure"/>
+        <Decorator ID="ForceSuccess"/>
+        <Condition ID="HaveMobileRobotModbusTCPJGBOTSubsystem">
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0">Robot selection</input_port>
+        </Condition>
+        <Condition ID="HaveTwoFingerGripper">
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0">Robot selection</input_port>
+        </Condition>
+        <Control ID="IfThenElse"/>
+        <Decorator ID="Inverter"/>
+        <Condition ID="IsEnable"/>
+        <Condition ID="IsMobileRobotModbusTCPJGBOTArrived">
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0">Robot selection</input_port>
+        </Condition>
+        <Condition ID="IsSystemRunning"/>
+        <Action ID="JogJoint">
+            <input_port name="motion_id" type="int" default="0">Motion id</input_port>
+            <input_port name="increase_count" type="int" default="50">Increase step count</input_port>
+            <input_port name="direction" type="int" default="1">Direction</input_port>
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0;1">Robot selection</input_port>
+        </Action>
+        <Action ID="JogJointToAngle">
+            <input_port name="pressing_interval_ms" type="int" default="500">Long pressing command interval</input_port>
+            <input_port name="tolerance" type="double" default="0.500000">Position tolerance, deg</input_port>
+            <input_port name="target" type="double" default="0.000000">Target joint angle, deg</input_port>
+            <input_port name="motion_id" type="int" default="0">Joint index / motion id</input_port>
+            <input_port name="increase_count" type="int" default="50">Jog step count</input_port>
+            <input_port name="robot_sel" type="int" default="0">Robot selection</input_port>
+        </Action>
+        <Decorator ID="KeepRunningUntilFailure"/>
+        <Decorator ID="LoopBool">
+            <output_port name="value" type="bool"/>
+            <input_port name="if_empty" type="BT::NodeStatus" default="SUCCESS">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+            <inout_port name="queue" type="BT::AnyTypeAllowed"/>
+        </Decorator>
+        <Decorator ID="LoopDouble">
+            <output_port name="value" type="double"/>
+            <input_port name="if_empty" type="BT::NodeStatus" default="SUCCESS">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+            <inout_port name="queue" type="BT::AnyTypeAllowed"/>
+        </Decorator>
+        <Decorator ID="LoopInt">
+            <output_port name="value" type="int"/>
+            <input_port name="if_empty" type="BT::NodeStatus" default="SUCCESS">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+            <inout_port name="queue" type="BT::AnyTypeAllowed"/>
+        </Decorator>
+        <Decorator ID="LoopString">
+            <output_port name="value" type="std::string"/>
+            <input_port name="if_empty" type="BT::NodeStatus" default="SUCCESS">Status to return if queue is empty: SUCCESS, FAILURE, SKIPPED</input_port>
+            <inout_port name="queue" type="BT::AnyTypeAllowed"/>
+        </Decorator>
+        <Action ID="MobileRobotModbusTCPJGBOT">
+            <input_port name="target_station_id" type="int" default="1">Target station ID</input_port>
+            <input_port name="navigate_open" type="int" default="0">Navigation open</input_port>
+            <input_port name="vtheta" type="float" default="0.2">theta velocity</input_port>
+            <input_port name="vy" type="float" default="0.2">y velocity</input_port>
+            <input_port name="vx" type="float" default="0.2">x velocity</input_port>
+            <input_port name="y_axis" type="float" default="0.1">y axis speed</input_port>
+            <input_port name="theta" type="float" default="0.1">theta axis speed</input_port>
+            <input_port name="x_axis" type="float" default="0.1">x axis speed</input_port>
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0;1">Robot selection</input_port>
+        </Action>
+        <Action ID="MoveAbsJ">
+            <input_port name="jointtarget_variablepool" type="std::string" default="home">Move joint target</input_port>
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0;1">Robot selection</input_port>
+        </Action>
+        <Action ID="MoveAbsJJointTarget">
+            <input_port name="speed" type="std::string" default="v100">Move speed</input_port>
+            <input_port name="jointtarget" type="std::string" default="P0">Joint target</input_port>
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0;1">Robot selection</input_port>
+        </Action>
+        <Action ID="MoveAbsJVar">
+            <input_port name="speed" type="std::string" default="v50">Move speed</input_port>
+            <input_port name="jointtarget_value" type="std::vector&lt;double, std::allocator&lt;double&gt; &gt;" default="0.1;0.2;0.3;0.4;0.5;0;0;0;0;0">Joint value target</input_port>
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0;1">Robot selection</input_port>
+        </Action>
+        <Action ID="MoveTwoFingersGripper">
+            <input_port name="interval" type="int" default="25">Interval between actions</input_port>
+            <input_port name="distance" type="int" default="0">Gripper distance</input_port>
+            <input_port name="robot_sel" type="std::vector&lt;int, std::allocator&lt;int&gt; &gt;" default="0;1">Robot selection</input_port>
+        </Action>
+        <Control ID="Parallel">
+            <input_port name="failure_count" type="int" default="1">number of children that need to fail to trigger a FAILURE</input_port>
+            <input_port name="success_count" type="int" default="-1">number of children that need to succeed to trigger a SUCCESS</input_port>
+        </Control>
+        <Control ID="ParallelAll">
+            <input_port name="max_failures" type="int" default="1">If the number of children returning FAILURE exceeds this value, ParallelAll returns FAILURE</input_port>
+        </Control>
+        <Decorator ID="Precondition">
+            <input_port name="else" type="BT::NodeStatus" default="FAILURE">Return status if condition is false</input_port>
+            <input_port name="if" type="std::string"/>
+        </Decorator>
+        <Control ID="ReactiveFallback"/>
+        <Control ID="ReactiveSequence"/>
+        <Decorator ID="Repeat">
+            <input_port name="num_cycles" type="int">Repeat a successful child up to N times. Use -1 to create an infinite loop.</input_port>
+        </Decorator>
+        <Decorator ID="RetryUntilSuccessful">
+            <input_port name="num_attempts" type="int">Execute again a failing child up to N times. Use -1 to create an infinite loop.</input_port>
+        </Decorator>
+        <Decorator ID="RunOnce">
+            <input_port name="then_skip" type="bool" default="true">If true, skip after the first execution, otherwise return the same NodeStatus returned once by the child.</input_port>
+        </Decorator>
+        <Action ID="Script">
+            <input_port name="code" type="std::string">Piece of code that can be parsed</input_port>
+        </Action>
+        <Condition ID="ScriptCondition">
+            <input_port name="code" type="BT::AnyTypeAllowed">Piece of code that can be parsed. Must return false or true</input_port>
+        </Condition>
+        <Control ID="Sequence"/>
+        <Control ID="SequenceWithMemory"/>
+        <Action ID="SetBlackboard">
+            <inout_port name="output_key" type="BT::AnyTypeAllowed">Name of the blackboard entry where the value should be written</inout_port>
+            <input_port name="value" type="BT::AnyTypeAllowed">Value to be written into the output_key</input_port>
+        </Action>
+        <Decorator ID="SkipUnlessUpdated">
+            <input_port name="entry" type="BT::Any">Entry to check</input_port>
+        </Decorator>
+        <Action ID="Sleep">
+            <input_port name="msec" type="unsigned int"/>
+        </Action>
+        <SubTree ID="SubTree">
+            <input_port name="_autoremap" type="bool" default="false">If true, all the ports with the same name will be remapped</input_port>
+        </SubTree>
+        <Control ID="Switch2">
+            <input_port name="case_2" type="std::string"/>
+            <input_port name="case_1" type="std::string"/>
+            <input_port name="variable" type="std::string"/>
+        </Control>
+        <Control ID="Switch3">
+            <input_port name="case_3" type="std::string"/>
+            <input_port name="case_2" type="std::string"/>
+            <input_port name="case_1" type="std::string"/>
+            <input_port name="variable" type="std::string"/>
+        </Control>
+        <Control ID="Switch4">
+            <input_port name="case_4" type="std::string"/>
+            <input_port name="case_3" type="std::string"/>
+            <input_port name="case_2" type="std::string"/>
+            <input_port name="case_1" type="std::string"/>
+            <input_port name="variable" type="std::string"/>
+        </Control>
+        <Control ID="Switch5">
+            <input_port name="case_5" type="std::string"/>
+            <input_port name="case_4" type="std::string"/>
+            <input_port name="case_3" type="std::string"/>
+            <input_port name="case_2" type="std::string"/>
+            <input_port name="case_1" type="std::string"/>
+            <input_port name="variable" type="std::string"/>
+        </Control>
+        <Control ID="Switch6">
+            <input_port name="case_5" type="std::string"/>
+            <input_port name="case_4" type="std::string"/>
+            <input_port name="case_6" type="std::string"/>
+            <input_port name="case_3" type="std::string"/>
+            <input_port name="case_2" type="std::string"/>
+            <input_port name="case_1" type="std::string"/>
+            <input_port name="variable" type="std::string"/>
+        </Control>
+        <Decorator ID="Timeout">
+            <input_port name="msec" type="unsigned int">After a certain amount of time, halt() the child if it is still running.</input_port>
+        </Decorator>
+        <Control ID="TryCatch">
+            <input_port name="catch_on_halt" type="bool" default="false">If true, execute the catch child when the node is halted during the try-block</input_port>
+        </Control>
+        <Action ID="UnsetBlackboard">
+            <input_port name="key" type="std::string">Key of the entry to remove</input_port>
+        </Action>
+        <Decorator ID="WaitValueUpdate">
+            <input_port name="entry" type="BT::Any">Entry to check</input_port>
+        </Decorator>
+        <Action ID="WasEntryUpdated">
+            <input_port name="entry" type="BT::Any">Entry to check</input_port>
+        </Action>
+        <Control ID="WhileDoElse"/>
+    </TreeNodesModel>
+</root>
